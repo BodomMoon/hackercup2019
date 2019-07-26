@@ -12,6 +12,9 @@ namespace {
     bool MakeRoot(const int root, const conditions& LCAs,const std::set<int>& nodes, dicts& isNeighbors, dicts& notNeighbors) {
         for (const auto& LCA : LCAs) {
             int x = LCA[0], y = LCA[1], z = LCA[2];
+            if (nodes.find(x) == nodes.find(y) && nodes.find(z) == nodes.find(y)) {
+                continue;
+            }
             if (x == root || y == root) {
                 if (z != root) {
                     return false;
@@ -33,10 +36,10 @@ namespace {
         return true;
     }
 
-    bool MakeSubtree(const int root, const std::set<int>& nodes, dicts& isNeighbors, dicts& notNeighbors, trees subtrees) {
+    bool MakeSubtree(const int root, const std::set<int>& nodes, dicts& isNeighbors, dicts& notNeighbors, trees& subtrees) {
         using namespace std;
         unordered_map<int, int> passed;
-
+        passed[root] = 1;
         for (const auto& node : nodes) {
             if (passed.find(node) != passed.end()) {
                 continue;
@@ -71,14 +74,25 @@ namespace {
         return true;
     }
 
-    int Helper(int root, const conditions& LCAs,std::set<int> nodes) {
+    bool Helper(int root, const conditions& LCAs,const std::set<int> nodes, std::vector<int>& result) {
         for (const auto& node : nodes) {
             dicts isNeighbor;
             dicts notNeighbor;
             if (MakeRoot(node, LCAs, nodes, isNeighbor, notNeighbor) == false) {
                 continue;
             }
+            trees subtrees;
+            if (MakeSubtree(node, nodes, isNeighbor, notNeighbor, subtrees) == false) {
+                continue;
+            }
+            result[node] = root;
+            for (const auto& subtree : subtrees) {
+                if (Helper(node, LCAs, subtree, result) == false)
+                    return false;
+            }
+            return true;
         }
+        return false;
     }
 
     std::vector<int> Solution() {
@@ -91,22 +105,42 @@ namespace {
 
         for (auto i = 0; i < limitCount; ++i) {
             vector<int> LCA{};
-            LCA.push_back(cin.get());
-            LCA.push_back(cin.get());
-            LCA.push_back(cin.get());
+            auto x = 0, y = 0, z = 0;
+            cin >> x >> y >> z;
+            LCA.push_back(x - 1);
+            LCA.push_back(y - 1);
+            LCA.push_back(z - 1);
+            LCAs.push_back(LCA);
+        }
+        vector<int> result(nodeCount, 0);
+        set<int> nodes;
+        for (int i = 0; i < nodeCount; ++i) {
+            nodes.insert(nodes.end(), i);
+        }
+        if (Helper(-1, LCAs, nodes, result) == false) {
+            return {};
+        }
+        return result;
+    }
+}
+
+int main()
+{
+    int testCase = 0;
+    std::cin >> testCase;
+
+    for (auto i = 0; i < testCase; ++i) {
+        const auto result = Solution();
+        if (result.empty())
+            std::cout << "Case #" << i + 1 << ": " << "Impossible" << std::endl;
+        else {
+            std::cout << "Case #" << i + 1 << ": ";
+            for (const auto& v : result) {
+                std::cout << v + 1 << " ";
+            }
+            std::cout << std::endl;
         }
     }
 
-    int main()
-    {
-        int testCase = 0;
-        std::cin >> testCase;
-
-        for (auto i = 0; i < testCase; ++i) {
-            const auto result = solution();
-            std::cout << "Case #" << i + 1 << ": " << result << std::endl;
-        }
-
-        return 0;
-    }
+    return 0;
 }

@@ -12,7 +12,7 @@ namespace {
     bool MakeRoot(const int root, const conditions& LCAs,const std::set<int>& nodes, dicts& isNeighbors, dicts& notNeighbors) {
         for (const auto& LCA : LCAs) {
             int x = LCA[0], y = LCA[1], z = LCA[2];
-            if (nodes.find(x) == nodes.find(y) && nodes.find(z) == nodes.find(y)) {
+            if (nodes.find(x) == nodes.end() || nodes.find(y) == nodes.end() || nodes.find(z) == nodes.end()) {
                 continue;
             }
             if (x == root || y == root) {

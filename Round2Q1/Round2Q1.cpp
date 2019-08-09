@@ -38,6 +38,5 @@ int main()
         const auto result = solution();
         std::cout << "Case #" << i + 1 << ": " << (result ? "Y" : "N") << std::endl;
     }
-
     return 0;
 }
